@@ -1,29 +1,36 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Saas
+namespace SaasLib
 {
-	public class SaasMaker<PerTenantStartup> : ISaasMaker
-		where PerTenantStartup : class
+	internal class TenantPipelineBuilder : ITenantPipelineBuilder
 	{
-		private readonly IApplicationBuilder _appBuilder;
+		private readonly IMultiTenancyBuilder _multiTenancyBuilder;		
 
-		public SaasMaker()
+		public TenantPipelineBuilder(IMultiTenancyBuilder multiTenancyBuilder)
 		{
-			var webHost = new WebHostBuilder().UseKestrel().UseStartup<PerTenantStartup>().Build();
+			_multiTenancyBuilder = multiTenancyBuilder;
+		}
+		
+		public TenantPipeline BuildTenancyChain(IApplication application)
+		{
+			var webHost = _multiTenancyBuilder.Build();
+			
 			var serviceProvider = webHost.Services;
 			var serverFeatures = webHost.ServerFeatures;
 
 			var appBuilderFactory = serviceProvider.GetRequiredService<IApplicationBuilderFactory>();
-			_appBuilder = appBuilderFactory.CreateBuilder(serverFeatures);
+			var appBuilder = appBuilderFactory.CreateBuilder(serverFeatures);
 			var factory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
-			_appBuilder.Use(async (context, next) =>
+			appBuilder.Use(async (context, next) =>
 			{
 				using (var scope = factory.CreateScope())
 				{
@@ -41,12 +48,10 @@ namespace Saas
 				configure = filter.Configure(configure);
 			}
 
-			configure(_appBuilder);
-		}
-		public RequestDelegate BuildTenancyChain()
-		{
-			var branchDelegate = _appBuilder.Build();
-			return branchDelegate;
+			configure(appBuilder);
+			
+			var branchDelegate = appBuilder.Build();
+			return new TenantPipeline(branchDelegate, serviceProvider);
 		}
 	}
 }

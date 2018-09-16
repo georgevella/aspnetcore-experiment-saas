@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SaasLib;
 
 namespace Saas.Controllers
 {
@@ -10,11 +11,22 @@ namespace Saas.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly ISaasApplicationContextAccessor _saasApplicationContextAccessor;
+
+        public ValuesController(ISaasApplicationContextAccessor saasApplicationContextAccessor)
+        {
+            _saasApplicationContextAccessor = saasApplicationContextAccessor;
+        }
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new string[]
+            {
+                "value1", 
+                "value2",
+                _saasApplicationContextAccessor.GetApplication().Id
+            };
         }
 
         // GET api/values/5

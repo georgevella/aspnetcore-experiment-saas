@@ -11,20 +11,16 @@ namespace Saas
 			IServiceCollection services
 		)
 		{
-            
+			services.AddMvc();
 		}
 
 		public override void Configure(
 			IApplicationBuilder app
 		)
 		{
-			app.Use(async (
-						context,
-						func
-					) =>
-					{
-						await context.Response.WriteAsync("Hello world");
-					});
+			app.UseDeveloperExceptionPage();
+
+			app.UseMvc();
 		}
 	}
 }
