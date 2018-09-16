@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SaasLib.Internal
@@ -19,6 +20,12 @@ namespace SaasLib.Internal
 		{
 			_masterWebHostBuilder = masterWebHostBuilder;
 		}
+
+		/// <summary>
+		/// 	Sets up the default tenant configurator used when no application speecific configurations are registered
+		/// or match the current application.
+		/// </summary>
+		public ITenantConfigurator Default => _defaultTenantConfigurator;
 
 		public IMultiTenancyBuilder<TApplication> For(
 			Predicate<TApplication> predicate,
@@ -42,6 +49,27 @@ namespace SaasLib.Internal
 			return this;
 		}
 
+		public IMultiTenancyBuilder<TApplication> AddServices(
+			Action<IServiceCollection> configureServicesCallback
+		)
+		{
+			if (configureServicesCallback == null)
+			{
+				throw new ArgumentNullException(nameof(configureServicesCallback));
+			}
+
+			_masterWebHostBuilder.ConfigureServices(
+				(
+					context,
+					collection
+				) =>
+				{
+					configureServicesCallback(collection);
+				});
+
+			return this;
+		}
+
 		public IWebHost Build(IApplication application)
 		{
 			var app = application as TApplication;
@@ -53,12 +81,6 @@ namespace SaasLib.Internal
 			}
 
 			return _defaultTenantConfigurator.Build();
-		}
-		
-		public IMultiTenancyBuilder<TApplication> UseStartup<TStartup>() where TStartup : class
-		{
-			_defaultTenantConfigurator.UseStartup<TStartup>();
-			return this;
 		}
 
 		public IMultiTenancyBuilder<TApplication> UseApplicationResolver<TApplicationResolver>() where TApplicationResolver : class, IApplicationResolver
