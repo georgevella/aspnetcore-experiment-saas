@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 
-namespace SaasLib
+namespace SaasLib.Internal
 {
 	public class TenantPipeline
 	{

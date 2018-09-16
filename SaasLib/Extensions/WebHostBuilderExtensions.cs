@@ -7,17 +7,18 @@ namespace SaasLib.Extensions
 {
 	public static class WebHostBuilderExtensions
 	{
-		public static IWebHostBuilder UseMultiTenancy(
+		public static IWebHostBuilder UseMultiTenancy<TApplication>(
 			this IWebHostBuilder masterWebHostBuilder,
-			Action<IMultiTenancyBuilder> configurator
+			Action<IMultiTenancyBuilder<TApplication>> configurator
 		)
+			where TApplication : class, IApplication
 		{
 			if (configurator == null)
 			{
 				throw new ArgumentNullException(nameof(configurator));
 			}
 			
-			var builder = new MultiTenancyBuilder(masterWebHostBuilder);
+			var builder = new MultiTenancyBuilder<TApplication>(masterWebHostBuilder);
 			configurator(builder);
 
 			masterWebHostBuilder.ConfigureServices(
@@ -26,8 +27,8 @@ namespace SaasLib.Extensions
 					collection
 				) =>
 				{
-					collection.AddSingleton<IMultiTenancyBuilder>(builder);
-					collection.AddSingleton<ITenantPipelineBuilder, TenantPipelineBuilder>();
+					collection.AddSingleton<IMultiTenancyBuilder<TApplication>>(builder);
+					collection.AddSingleton<ITenantPipelineBuilder, TenantPipelineBuilder<TApplication>>();
 				});
 			masterWebHostBuilder.UseStartup<MasterStartup>();
 			

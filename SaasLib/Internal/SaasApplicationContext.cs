@@ -1,4 +1,4 @@
-﻿namespace SaasLib
+﻿namespace SaasLib.Internal
 {
 	internal class SaasApplicationContext
 	{

@@ -25,10 +25,12 @@ namespace Saas
             string[] args
         ) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseMultiTenancy(
+                .UseMultiTenancy<SampleApplication>(
                     builder => builder
                         .UseStartup<TenantStartup>()
                         .UseApplicationResolver<ApplicationResolver>()
+                        .For(application => application.Id == "Tenant3",
+                             configurator => configurator.UseStartup<Tenant3Startup>())
                 );
     }
 
@@ -44,11 +46,15 @@ namespace Saas
             switch (httpContext.Request.Host.Host)
             {
                 case "localhost":
-                    application = new Application() {Id = "Default-Localhost"};
+                    application = new SampleApplication() {Id = "Default-Localhost"};
                     break;
                 
                 case "tenant2.localhost":
-                    application = new Application() {Id = "Tenant2"};
+                    application = new SampleApplication() {Id = "Tenant2"};
+                    break;
+                
+                case "tenant3.localhost":
+                    application = new SampleApplication() { Id = "Tenant3"};
                     break;
             }
 
@@ -56,7 +62,7 @@ namespace Saas
         }
     }
     
-    public class Application : IApplication
+    public class SampleApplication : IApplication
     {
         public string Id { get; set; }
     }

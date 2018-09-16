@@ -1,6 +1,6 @@
 using System;
 
-namespace SaasLib
+namespace SaasLib.Internal
 {
 	class SaasApplicationContextAccessor : ISaasApplicationContextAccessor
 	{

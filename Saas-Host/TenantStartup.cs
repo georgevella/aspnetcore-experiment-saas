@@ -23,4 +23,27 @@ namespace Saas
 			app.UseMvc();
 		}
 	}
+	
+	public class Tenant3Startup : StartupBase
+	{
+		public override void ConfigureServices(
+			IServiceCollection services
+		)
+		{
+			
+		}
+
+		public override void Configure(
+			IApplicationBuilder app
+		)
+		{
+			app.Use(async (
+						context,
+						func
+					) =>
+					{
+						await context.Response.WriteAsync("Hello world");
+					});
+		}
+	}
 }

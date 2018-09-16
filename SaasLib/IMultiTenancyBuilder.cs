@@ -1,15 +1,22 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 
 namespace SaasLib
 {
-	public interface IMultiTenancyBuilder
+	public interface IMultiTenancyBuilder<TApplication>
+		where TApplication : class, IApplication
 	{
-		IMultiTenancyBuilder UseStartup<TStartup>()
+		IMultiTenancyBuilder<TApplication> UseStartup<TStartup>()
 			where TStartup : class;
-
-		IMultiTenancyBuilder UseApplicationResolver<TApplicationReslover>()
+	
+		IMultiTenancyBuilder<TApplication> UseApplicationResolver<TApplicationReslover>()
 			where TApplicationReslover : class, IApplicationResolver;
 
-		IWebHost Build();
+		IMultiTenancyBuilder<TApplication> For(
+			Predicate<TApplication> predicate,
+			Action<ITenantConfigurator> configurationCallback
+		);
+
+		IWebHost Build(IApplication application);
 	}
 }

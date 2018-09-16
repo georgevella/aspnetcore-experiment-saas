@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace SaasLib
+namespace SaasLib.Internal
 {
 	internal class SaasApplicationContextStore
 	{

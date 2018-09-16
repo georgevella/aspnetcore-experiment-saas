@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Builder;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SaasLib
+namespace SaasLib.Internal
 {
-	internal class TenantPipelineBuilder : ITenantPipelineBuilder
+	internal class TenantPipelineBuilder<TApplication> : ITenantPipelineBuilder
+		where TApplication : class, IApplication
 	{
-		private readonly IMultiTenancyBuilder _multiTenancyBuilder;		
+		private readonly IMultiTenancyBuilder<TApplication> _tenantConfigurator;		
 
-		public TenantPipelineBuilder(IMultiTenancyBuilder multiTenancyBuilder)
+		public TenantPipelineBuilder(IMultiTenancyBuilder<TApplication> tenantConfigurator)
 		{
-			_multiTenancyBuilder = multiTenancyBuilder;
+			_tenantConfigurator = tenantConfigurator;
 		}
 		
 		public TenantPipeline BuildTenancyChain(IApplication application)
 		{
-			var webHost = _multiTenancyBuilder.Build();
+			var webHost = _tenantConfigurator.Build(application);
 			
 			var serviceProvider = webHost.Services;
 			var serverFeatures = webHost.ServerFeatures;
