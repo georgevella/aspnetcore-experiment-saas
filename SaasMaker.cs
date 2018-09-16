@@ -8,15 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Saas
 {
-	public class SaasMaker<TenancyStartup> : ISaasMaker
-		where TenancyStartup : class, IStartup
-
+	public class SaasMaker<PerTenantStartup> : ISaasMaker
+		where PerTenantStartup : class
 	{
 		private readonly IApplicationBuilder _appBuilder;
 
 		public SaasMaker()
 		{
-			var webHost = new WebHostBuilder().UseKestrel().UseStartup<TenancyStartup>().Build();
+			var webHost = new WebHostBuilder().UseKestrel().UseStartup<PerTenantStartup>().Build();
 			var serviceProvider = webHost.Services;
 			var serverFeatures = webHost.ServerFeatures;
 
